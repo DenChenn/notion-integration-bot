@@ -1,4 +1,10 @@
-# notion-integration-bot
+# 🤖 notion-integration-bot 🤖
 
-This is an integration bot for my startup company, and I build it on my own ~~  
-Hope it can help my team getting better lol !!!
+## 👇Function Introduction:  
+* Send notification when new task is created.  
+* Send notification when some tack is updated.  
+* Meeting agenda anouncement.  
+
+## 🔥Next Version Improvement:  
+* Sending message to team member corresponding to task assignee.
+* Chatting bot function.

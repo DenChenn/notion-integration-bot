@@ -1,4 +1,4 @@
-# 🤖 notion-integration-bot 🤖
+# 🤖 Notion Integration Bot 🤖
 
 ### 🤳 Bot self-introduction:  
 

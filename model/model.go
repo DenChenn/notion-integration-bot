@@ -7,5 +7,7 @@ type Field struct {
 
 type DepartmentDetail struct {
 	Action string
+	AssigneeEmail string
+	Title string
 	FieldSet []Field
 }

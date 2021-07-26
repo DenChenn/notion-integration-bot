@@ -61,35 +61,60 @@ func CheckDepartment(url string) (isChange bool, detailSet []model.DepartmentDet
 		createdTime = createdTime.Add(40 * time.Second)
 		editTime = editTime.Add(40 * time.Second)
 		
+		fmt.Println("before")
+
 		if(createdTime.Before(current) && createdTime.After(currentBefore)){
 			isChange = true
 
-			detail := model.DepartmentDetail{
-				Action: "Create",
-				FieldSet: make([]model.Field, 0),
+			assigneeSet := gjson.Get(page.String(), `properties.Assignee.people`).Array()
+			title := gjson.Get(page.String(), `properties.Projects.title.0.text.content`).Str
+			taskType := gjson.Get(page.String(), `properties.Type.select.name`).Str
+			status := gjson.Get(page.String(), `properties.Type.select.name`).Str
+			priority := gjson.Get(page.String(), `properties.Priority.select.name`).Str
+
+			for _, assignee := range assigneeSet{
+
+				detail := model.DepartmentDetail{
+					Action: "Create",
+					Title: title,
+					AssigneeEmail: gjson.Get(assignee.String(), `person.email`).Str,
+					FieldSet: make([]model.Field, 0),
+				}
+
+				detail.FieldSet = append(detail.FieldSet, model.Field{"TaskType", taskType})
+				detail.FieldSet = append(detail.FieldSet, model.Field{"Status", status})
+				detail.FieldSet = append(detail.FieldSet, model.Field{"Priority", priority})
+				
+				detailSet = append(detailSet, detail)
 			}
-			detail.FieldSet = append(detail.FieldSet, model.Field{"Title", gjson.Get(page.String(), `properties.Projects.title.0.text.content`).Str})
-			detail.FieldSet = append(detail.FieldSet, model.Field{"Assignee", gjson.Get(page.String(), `properties.Assignee.people.0.name`).Str})
-			detail.FieldSet = append(detail.FieldSet, model.Field{"TaskType", gjson.Get(page.String(), `properties.Type.select.name`).Str})
-			detail.FieldSet = append(detail.FieldSet, model.Field{"Status", gjson.Get(page.String(), `properties.Status.select.name`).Str,})
-			detail.FieldSet = append(detail.FieldSet, model.Field{"Priority", gjson.Get(page.String(), `properties.Priority.select.name`).Str})
-			
-			detailSet = append(detailSet, detail)
 
 		} else if (editTime.Before((current)) && editTime.After(currentBefore)){
 			isChange = true
 
-			detail := model.DepartmentDetail{
-				Action: "Update",
-				FieldSet: make([]model.Field, 0),
-			}
-			detail.FieldSet = append(detail.FieldSet, model.Field{"Title", gjson.Get(page.String(), `properties.Projects.title.0.text.content`).Str})
-			detail.FieldSet = append(detail.FieldSet, model.Field{"Assignee", gjson.Get(page.String(), `properties.Assignee.people.0.name`).Str})
-			detail.FieldSet = append(detail.FieldSet, model.Field{"TaskType", gjson.Get(page.String(), `properties.Type.select.name`).Str})
-			detail.FieldSet = append(detail.FieldSet, model.Field{"Status", gjson.Get(page.String(), `properties.Status.select.name`).Str,})
-			detail.FieldSet = append(detail.FieldSet, model.Field{"Priority", gjson.Get(page.String(), `properties.Priority.select.name`).Str})
+			assigneeSet := gjson.Get(page.String(), `properties.Assignee.people`).Array()
+			title := gjson.Get(page.String(), `properties.Projects.title.0.text.content`).Str
+			taskType := gjson.Get(page.String(), `properties.Type.select.name`).Str
+			status := gjson.Get(page.String(), `properties.Status.select.name`).Str
+			priority := gjson.Get(page.String(), `properties.Priority.select.name`).Str
+			pageLink := gjson.Get(page.String(), `url`).Str
 
-			detailSet = append(detailSet, detail)
+			for _, assignee := range assigneeSet{
+
+				detail := model.DepartmentDetail{
+					Action: "Update",
+					Title: title,
+					AssigneeEmail: gjson.Get(assignee.String(), `person.email`).Str,
+					FieldSet: make([]model.Field, 0),
+				}
+
+				detail.FieldSet = append(detail.FieldSet, model.Field{"TaskType", taskType})
+				detail.FieldSet = append(detail.FieldSet, model.Field{"Status", status})
+				detail.FieldSet = append(detail.FieldSet, model.Field{"Priority", priority})
+				detail.FieldSet = append(detail.FieldSet, model.Field{"PageLink", pageLink})
+				
+				detailSet = append(detailSet, detail)
+			}
+
 		}
 	}
 	return

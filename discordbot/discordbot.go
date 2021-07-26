@@ -26,7 +26,7 @@ func CreateBot() *discordgo.Session {
 
 func DepartmentMessageTransfer(detail model.DepartmentDetail, color int) (message discordgo.MessageEmbed){
 	description := ""
-	fmt.Println(detail)
+
 	if(detail.Action == "Create"){
 		description = "Notion has something created !"
 	} else {
@@ -34,7 +34,7 @@ func DepartmentMessageTransfer(detail model.DepartmentDetail, color int) (messag
 	}
 
 	var fd []*discordgo.MessageEmbedField
-	for i := 1;i < 4;i++{
+	for i := 0;i < len(detail.FieldSet);i++ {
 		var e discordgo.MessageEmbedField
 		e.Name = detail.FieldSet[i].Key
 		e.Value = detail.FieldSet[i].Value
@@ -42,7 +42,7 @@ func DepartmentMessageTransfer(detail model.DepartmentDetail, color int) (messag
 	}
 
 	message = discordgo.MessageEmbed{
-		Title:       detail.FieldSet[0].Value,
+		Title:       detail.Title,
 		Description: description,
 		Color:       color,
 		Fields:      fd,
@@ -50,14 +50,43 @@ func DepartmentMessageTransfer(detail model.DepartmentDetail, color int) (messag
 	return
 }
 
-func SendMessageEmbed(channelId string, message discordgo.MessageEmbed){
+func SendMessageEmbedToUser(userID string, message discordgo.MessageEmbed){
 	discordClient := CreateBot()
-	_, err := discordClient.ChannelMessageSendEmbed(channelId, &message)
+
+	st, err := discordClient.UserChannelCreate(userID)
+	if err != nil {
+		fmt.Print(err)
+		return
+	}
+
+	_, err = discordClient.ChannelMessageSendEmbed(st.ID, &message)
 	if err != nil {
 		fmt.Println(err.Error())
 		return
 	}
 	return
+}
+
+func DistributeMessage(detailSet *[]model.DepartmentDetail) {
+	for _, detail := range *detailSet{
+		m := DepartmentMessageTransfer(detail, 4388240)
+
+		if(detail.AssigneeEmail == config.YENTINGCHEN_EMAIL){
+			SendMessageEmbedToUser(config.YENTINGCHEN, m)
+		} else if (detail.AssigneeEmail == config.TADHSUEH_EMAIL) {
+			SendMessageEmbedToUser(config.TADHSUEH, m)
+		} else if (detail.AssigneeEmail == config.YUANLIN_EMAIL){
+			SendMessageEmbedToUser(config.YUANLIN, m)
+		} else if (detail.AssigneeEmail == config.YUTUNG_EMAIL){
+			SendMessageEmbedToUser(config.YUTUNG, m)
+		} else if (detail.AssigneeEmail == config.FANGFANG_EMAIL){
+			SendMessageEmbedToUser(config.FANGFANG, m)
+		} else if (detail.AssigneeEmail == config.WINNIEK_EMAIL){
+			SendMessageEmbedToUser(config.WINNIEK, m)
+		} else if (detail.AssigneeEmail == config.MARYCHOO_EMAIL){
+			SendMessageEmbedToUser(config.MARYCHOO, m)
+		}
+	}
 }
 
 func CreateChattingBot() {
@@ -118,5 +147,36 @@ func ChatHandler(client *discordgo.Session, discordMessage *discordgo.MessageCre
 			fmt.Println(err.Error())
 			return
 		}
+	} else if (discordMessage.Content == "Yen's Notion Integration Bot 版本更新!"){
+		var fd []*discordgo.MessageEmbedField
+		var e = &discordgo.MessageEmbedField{}
+		e.Name = "#私訊團隊成員 提醒相關issue"
+		e.Value = ":rocket: notion上面的issue有提及成員 都會收到貼心提醒喔~"
+		fd = append(fd, e)
+		e = &discordgo.MessageEmbedField{}
+		e.Name = "#多個提及成員"
+		e.Value = ":rocket: 若是有多個提及的成員在同一個issue中 全部都會收到通知喔! 大家可以多多善用這提及多人的功能!"
+		fd = append(fd, e)
+		e = &discordgo.MessageEmbedField{}
+		e.Name = "#提供頁面連結"
+		e.Value = ":rocket: 新版本的通知內會有頁面連結 點近去就可以進到notion了喔~"
+		fd = append(fd, e)
+
+		message := discordgo.MessageEmbed{
+			Title:       ":fire: 大家好! 我的新版本已經上線了!!",
+			Description: "我是專門為workfe設計的整合機器人~ 之後我將會跟大家一起努力!!!",
+			Color:       16775936,
+			Fields:      fd,
+		}
+
+		_, err := client.ChannelMessageSendEmbed(config.MeetingRoomChannelId, &message)
+
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
 	}
 }
+
+
+

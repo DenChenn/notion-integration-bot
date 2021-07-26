@@ -60,8 +60,6 @@ func CheckDepartment(url string) (isChange bool, detailSet []model.DepartmentDet
 		//justify time problem
 		createdTime = createdTime.Add(40 * time.Second)
 		editTime = editTime.Add(40 * time.Second)
-		
-		fmt.Println("before")
 
 		if(createdTime.Before(current) && createdTime.After(currentBefore)){
 			isChange = true
@@ -69,8 +67,9 @@ func CheckDepartment(url string) (isChange bool, detailSet []model.DepartmentDet
 			assigneeSet := gjson.Get(page.String(), `properties.Assignee.people`).Array()
 			title := gjson.Get(page.String(), `properties.Projects.title.0.text.content`).Str
 			taskType := gjson.Get(page.String(), `properties.Type.select.name`).Str
-			status := gjson.Get(page.String(), `properties.Type.select.name`).Str
+			status := gjson.Get(page.String(), `properties.Status.select.name`).Str
 			priority := gjson.Get(page.String(), `properties.Priority.select.name`).Str
+			pageLink := gjson.Get(page.String(), `url`).Str
 
 			for _, assignee := range assigneeSet{
 
@@ -84,6 +83,7 @@ func CheckDepartment(url string) (isChange bool, detailSet []model.DepartmentDet
 				detail.FieldSet = append(detail.FieldSet, model.Field{"TaskType", taskType})
 				detail.FieldSet = append(detail.FieldSet, model.Field{"Status", status})
 				detail.FieldSet = append(detail.FieldSet, model.Field{"Priority", priority})
+				detail.FieldSet = append(detail.FieldSet, model.Field{"PageLink", pageLink})
 				
 				detailSet = append(detailSet, detail)
 			}
